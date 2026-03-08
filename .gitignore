@@ -1,0 +1,33 @@
+# Build
+api/bin/
+api/obj/
+[Dd]ebug/
+[Rr]elease/
+
+# IDE
+.idea/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local data
+api/*.db
+api/*.db-shm
+api/*.db-wal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+appsettings.*.local.json
+*.pfx
+
+# NuGet
+*.nupkg
+.nuget/packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
