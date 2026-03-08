@@ -1,0 +1,69 @@
+{
+  "customers": ["acme-123", "beta-456"],
+  "devices": [
+    {
+      "customerId": "acme-123",
+      "deviceId": "dev-001",
+      "label": "Boiler #3",
+      "location": "Plant A"
+    },
+    {
+      "customerId": "acme-123",
+      "deviceId": "dev-002",
+      "label": "Chiller #1",
+      "location": "Plant A"
+    },
+    {
+      "customerId": "beta-456",
+      "deviceId": "dev-100",
+      "label": "Pump #9",
+      "location": "Site B"
+    }
+  ],
+  "telemetry": [
+    {
+      "customerId": "acme-123",
+      "deviceId": "dev-001",
+      "eventId": "evt-a1",
+      "recordedAt": "2025-05-04T12:34:56Z",
+      "value": 21.5
+    },
+    {
+      "customerId": "acme-123",
+      "deviceId": "dev-001",
+      "eventId": "evt-a2",
+      "recordedAt": "2025-05-04T12:35:30Z",
+      "value": 22.0
+    },
+    {
+      "customerId": "acme-123",
+      "deviceId": "dev-001",
+      "eventId": "evt-a2",
+      "recordedAt": "2025-05-04T12:35:30Z",
+      "value": 22.0,
+      "_note": "Duplicate resend"
+    },
+    {
+      "customerId": "acme-123",
+      "deviceId": "dev-001",
+      "eventId": "evt-a0",
+      "recordedAt": "2025-05-04T12:30:00Z",
+      "value": 21.0,
+      "_note": "Out-of-order arrival"
+    },
+    {
+      "customerId": "acme-123",
+      "deviceId": "dev-002",
+      "eventId": "evt-b1",
+      "recordedAt": "2025-05-04T12:40:00Z",
+      "value": 6.8
+    },
+    {
+      "customerId": "beta-456",
+      "deviceId": "dev-100",
+      "eventId": "evt-c1",
+      "recordedAt": "2025-05-04T13:00:00Z",
+      "value": 55.2
+    }
+  ]
+}
