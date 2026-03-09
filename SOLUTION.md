@@ -1,3 +1,6 @@
+<img width="737" height="338" alt="image" src="https://github.com/user-attachments/assets/02b0ca9a-50f3-4dda-96ca-edf4ce2fe461" />
+
+
 ## Q1. How you would run this in Azure or AWS (key services and how components fit together)
 
 A cloud-based solution can take advantage of cloud resources to scale out and increase reliability. The diagram shows we can separate the app into:
