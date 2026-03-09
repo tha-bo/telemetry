@@ -40,7 +40,7 @@ public static class AdminEndpoints
                     EventId = e.EventId,
                     CustomerId = e.CustomerId,
                     DeviceId = e.DeviceId,
-                    RecordedAt = DateTimeOffset.Parse(e.RecordedAt),
+                    RecordedAt = DateTimeOffset.Parse(e.RecordedAt).ToUnixTimeMilliseconds(),
                     Value = e.Value
                 });
             await db.SaveChangesAsync();

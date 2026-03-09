@@ -9,6 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<TelemetryDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("TelemetryDb")));
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -16,6 +25,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.UseCors();
 
 // Ensure database is created and seeded
 using (var scope = app.Services.CreateScope())
@@ -56,7 +67,7 @@ using (var scope = app.Services.CreateScope())
                             EventId = e.EventId,
                             CustomerId = e.CustomerId,
                             DeviceId = e.DeviceId,
-                            RecordedAt = DateTimeOffset.Parse(e.RecordedAt),
+                            RecordedAt = DateTimeOffset.Parse(e.RecordedAt).ToUnixTimeMilliseconds(),
                             Value = e.Value
                         });
                 }

@@ -15,11 +15,24 @@ public static class TelemetryEndpoints
                 query = query.Where(e => e.CustomerId == customerId);
             if (!string.IsNullOrEmpty(deviceId))
                 query = query.Where(e => e.DeviceId == deviceId);
+
             var list = await query.OrderBy(e => e.RecordedAt).ToListAsync();
-            return list.Count > 0 ? Results.Ok(list) : Results.NotFound();
+            if (list.Count == 0)
+                return Results.NotFound();
+
+            var result = list
+                .Select(e => new TelemetryEventResponse(
+                    e.EventId,
+                    e.CustomerId,
+                    e.DeviceId,
+                    e.RecordedAt,
+                    e.Value))
+                .ToList();
+
+            return Results.Ok(result);
         });
 
-        app.MapGet("/customers/{customerId}/telemetry", async (string customerId, string? deviceId, string? from, string? to, TelemetryDbContext db) =>
+        app.MapGet("/customers/{customerId}/telemetry", async (string customerId, string? deviceId, long? from, long? to, TelemetryDbContext db) =>
         {
             var customerExists = await db.Customers.AnyAsync(c => c.CustomerId == customerId);
             if (!customerExists)
@@ -31,14 +44,23 @@ public static class TelemetryEndpoints
             if (!string.IsNullOrEmpty(deviceId))
                 query = query.Where(e => e.DeviceId == deviceId);
 
-            if (!string.IsNullOrEmpty(from) && DateTimeOffset.TryParse(from, out var fromDate))
-                query = query.Where(e => e.RecordedAt >= fromDate);
+            if (from.HasValue)
+                query = query.Where(e => e.RecordedAt >= from.Value);
 
-            if (!string.IsNullOrEmpty(to) && DateTimeOffset.TryParse(to, out var toDate))
-                query = query.Where(e => e.RecordedAt <= toDate);
+            if (to.HasValue)
+                query = query.Where(e => e.RecordedAt <= to.Value);
 
             var list = await query.OrderBy(e => e.RecordedAt).ToListAsync();
-            return Results.Ok(list);
+            var result = list
+                .Select(e => new TelemetryEventResponse(
+                    e.EventId,
+                    e.CustomerId,
+                    e.DeviceId,
+                    e.RecordedAt,
+                    e.Value))
+                .ToList();
+
+            return Results.Ok(result);
         });
 
         app.MapPost("/telemetry/events", async (CreateTelemetryEventRequest request, TelemetryDbContext db) =>
@@ -65,8 +87,7 @@ public static class TelemetryEndpoints
             if (eventExists)
                 return Results.Conflict(new { error = "An event with this EventId already exists." });
 
-            if (!DateTimeOffset.TryParse(request.RecordedAt, out var recordedAt))
-                recordedAt = DateTimeOffset.UtcNow;
+            var recordedAt = request.RecordedAt ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var evt = new TelemetryEvent
             {
@@ -78,7 +99,17 @@ public static class TelemetryEndpoints
             };
             db.TelemetryEvents.Add(evt);
             await db.SaveChangesAsync();
-            return Results.Created($"/telemetry/events?customerId={Uri.EscapeDataString(customerId)}&deviceId={Uri.EscapeDataString(deviceId)}", evt);
+
+            var response = new TelemetryEventResponse(
+                evt.EventId,
+                evt.CustomerId,
+                evt.DeviceId,
+                evt.RecordedAt,
+                evt.Value);
+
+            return Results.Created(
+                $"/telemetry/events?customerId={Uri.EscapeDataString(customerId)}&deviceId={Uri.EscapeDataString(deviceId)}",
+                response);
         });
 
         app.MapGet("/telemetry/info", () => Results.Ok(new { Unit = "C", Metric = "temperature" }));
@@ -87,4 +118,6 @@ public static class TelemetryEndpoints
     }
 }
 
-internal record CreateTelemetryEventRequest(string? CustomerId, string? DeviceId, string? EventId, string? RecordedAt, double Value);
+internal record TelemetryEventResponse(string EventId, string CustomerId, string DeviceId, long RecordedAt, double Value);
+
+internal record CreateTelemetryEventRequest(string? CustomerId, string? DeviceId, string? EventId, long? RecordedAt, double Value);
